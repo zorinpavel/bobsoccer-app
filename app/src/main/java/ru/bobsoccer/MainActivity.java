@@ -7,7 +7,10 @@ import android.view.View;
 
 import org.json.JSONObject;
 
-public class MainActivity extends Activity implements API.ApiResponse {
+import java.util.HashMap;
+import java.util.Map;
+
+public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
 
@@ -16,19 +19,17 @@ public class MainActivity extends Activity implements API.ApiResponse {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Map<String, String> params = new HashMap<>();
+        params.put("paramKey", "paramValue");
         new API(this, new API.ApiResponse() {
             @Override
-            public void onTaskCompleted(JSONObject jsonObj){
-                Log.d(TAG, "Api.jsonObj:" + String.valueOf(jsonObj));
+            public void onTaskCompleted(JSONObject jsonObj) {
+                Log.d(TAG, String.valueOf(jsonObj));
             }
-        }).Get("Users", "GetUser");
+        }, "GET", "Users", "GetUser").execute(params);
     }
 
     public void buttonClick(View view) {
     }
 
-    @Override
-    public void onTaskCompleted(JSONObject output) {
-
-    }
 }

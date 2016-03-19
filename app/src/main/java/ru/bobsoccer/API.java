@@ -2,121 +2,108 @@ package ru.bobsoccer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
+import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class API {
+public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
 
+    private static final String TAG = "API";
     private static final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpeg");
 
-    private final OkHttpClient client;
+    private ProgressDialog pDialog;
+
+    private OkHttpClient client;
     private static final String ApiHostName = "api.bobsoccer.ru";
     private static final String ApiUrlBase = "http://" + ApiHostName;
     private String ApiUrlRequest = null;
-    public Activity mActivity;
-    public static Session Session;
-    public static String UserToken;
-    public Callback callback;
-
-    private static final String TAG = "API";
 
     public interface ApiResponse {
         void onTaskCompleted(JSONObject output);
     }
 
+    public Activity mActivity = null;
     public ApiResponse apiResponse = null;
+    public String requestMethod = "GET";
+    public String ClassName = null;
+    public String MethodName = null;
 
-    public API(Activity _mActivity, ApiResponse _apiResponse) {
-        mActivity = _mActivity;
-        apiResponse = _apiResponse;
-
-        client = new OkHttpClient.Builder()
+    public API(Activity _mActivity, ApiResponse _apiResponse, String _requestMethod, String _ClassName, String _MethodName) {
+        this.mActivity = _mActivity;
+        this.apiResponse = _apiResponse;
+        this.client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
-
-        Session = new Session(mActivity);
-        UserToken = Session.Get("UserToken");
-        callback = new Callback() {
-
-            public JSONObject responseObj;
-            public ApiResponse apiResponse = null;
-
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                try {
-                    responseObj = new JSONObject(response.body().string());
-                    Log.d(TAG, String.valueOf(responseObj));
-
-                    mActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                String isError = responseObj.getString("Error");
-                                if (isError.equals("1")) {
-                                    String ErrorValue = "";
-                                    JSONArray Errors = responseObj.getJSONArray("Errors");
-                                    for (int i = 0; i < Errors.length(); i++) {
-                                        ErrorValue = ErrorValue + Errors.getJSONObject(i).getString("Error") + "\n";
-                                    }
-                                    showNotice(ErrorValue);
-                                } else {
-                                    apiResponse.onTaskCompleted(responseObj);
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                } catch (JSONException e) {
-                    Log.e(mActivity.getPackageName(), "API responseObj is NULL");
-                    e.printStackTrace();
-                }
-            }
-
-        };
+        this.requestMethod = _requestMethod;
+        this.ClassName = _ClassName;
+        this.MethodName = _MethodName;
     }
 
-    private String GetUserAgent() {
-        PackageManager manager = mActivity.getPackageManager();
-        PackageInfo info;
-        String UserAgentName = "";
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        pDialog = new ProgressDialog(this.mActivity);
+        pDialog.setMessage("Загрузка ...");
+        pDialog.setCancelable(false);
+        pDialog.show();
+    }
+
+    @Override
+    protected JSONObject doInBackground(Map<String, String>... requestParams) {
+        Map<String, String> params = new HashMap<>();
+        for (Map.Entry param : requestParams[0].entrySet()) {
+            params.put(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
+        }
+        if(params.size() <= 0 )
+            return Get(this.ClassName, this.MethodName, params);
+        else
+            return Get(this.ClassName, this.MethodName);
+    }
+
+    @Override
+    protected void onPostExecute(JSONObject resultObj) {
+        super.onPostExecute(resultObj);
+
+        if (pDialog.isShowing())
+            pDialog.dismiss();
+
         try {
-            info = manager.getPackageInfo(mActivity.getPackageName(), 0);
-            UserAgentName = info.packageName + " " + info.versionName + " Android: " + Build.VERSION.RELEASE + " " + Build.VERSION.CODENAME + " " + Build.VERSION.SDK_INT + " (" + Build.MANUFACTURER + " " + Build.MODEL + ")";
-        } catch (PackageManager.NameNotFoundException e) {
+            String isError = resultObj.getString("Error");
+            if (isError.equals("1")) {
+                String ErrorValue = "";
+                JSONArray Errors = resultObj.getJSONArray("Errors");
+                for (int i = 0; i < Errors.length(); i++) {
+                    ErrorValue = ErrorValue + Errors.getJSONObject(i).getString("Error") + "\n";
+                }
+                showNotice(ErrorValue);
+            } else {
+                apiResponse.onTaskCompleted(resultObj);
+            }
+        } catch (JSONException e) {
             e.printStackTrace();
         }
-        return UserAgentName;
+
     }
 
     public JSONObject Get(String ClassName, String MethodName) {
@@ -133,40 +120,13 @@ public class API {
                 .build();
         ApiUrlRequest = null;
 
-        client.newCall(request).enqueue(callback);
-
-        return null;
-    }
-
-    public JSONObject Post(String ClassName, String MethodName, Map<String, String> postParams, String postFileName) throws IOException {
+        Response response;
         JSONObject jsonObj = null;
-        getApiUrlRequest(ClassName, MethodName, new HashMap<String, String>());
-
-        MultipartBody.Builder builder = new MultipartBody.Builder();
-        builder.setType(MultipartBody.FORM);
-        for (Map.Entry param : postParams.entrySet()) {
-            builder.addFormDataPart(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
-        }
-        if(postFileName != null && !postFileName.isEmpty()) {
-            builder.addFormDataPart("image", postFileName, RequestBody.create(MEDIA_TYPE_JPG, new File(postFileName)));
-        }
-        RequestBody requestBody = builder.build();
-
-        Request request = new Request.Builder()
-                .url(this.ApiUrlRequest)
-                .post(requestBody)
-                .build();
-        this.ApiUrlRequest = null;
-
-        // TODO: Catch SocketTimeoutException
-        Response response = client.newCall(request).execute();
-        if (!response.isSuccessful())
-            throw new IOException("Unexpected code " + response);
-
         try {
+            response = this.client.newCall(request).execute();
             jsonObj = new JSONObject(response.body().string());
-        } catch (JSONException e) {
-            showError("API.Post server error");
+        } catch (JSONException | IOException e) {
+            showError("Api.Get server error");
         }
 
         Log.d(TAG, String.valueOf(jsonObj));
@@ -181,6 +141,19 @@ public class API {
         }
         Log.d(TAG, this.ApiUrlRequest);
 
+    }
+
+    private String GetUserAgent() {
+        PackageManager manager = mActivity.getPackageManager();
+        PackageInfo info;
+        String UserAgentName = "";
+        try {
+            info = manager.getPackageInfo(mActivity.getPackageName(), 0);
+            UserAgentName = info.packageName + " " + info.versionName + " Android: " + Build.VERSION.RELEASE + " " + Build.VERSION.CODENAME + " " + Build.VERSION.SDK_INT + " (" + Build.MANUFACTURER + " " + Build.MODEL + ")";
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return UserAgentName;
     }
 
     public void showError(String message) {
@@ -212,3 +185,101 @@ public class API {
     }
 
 }
+
+//    public Activity mActivity;
+//    public static Session Session;
+//    public static String UserToken;
+//    public Callback callback;
+//
+//
+//
+//    public API(Activity _mActivity, ApiResponse _apiResponse) {
+//
+//
+//        Session = new Session(mActivity);
+//        UserToken = Session.Get("UserToken");
+//        callback = new Callback() {
+//
+//            public JSONObject responseObj;
+//            public ApiResponse apiResponse = null;
+//
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, final Response response) throws IOException {
+//                try {
+//                    responseObj = new JSONObject(response.body().string());
+//                    Log.d(TAG, String.valueOf(responseObj));
+//
+//                    mActivity.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                String isError = responseObj.getString("Error");
+//                                if (isError.equals("1")) {
+//                                    String ErrorValue = "";
+//                                    JSONArray Errors = responseObj.getJSONArray("Errors");
+//                                    for (int i = 0; i < Errors.length(); i++) {
+//                                        ErrorValue = ErrorValue + Errors.getJSONObject(i).getString("Error") + "\n";
+//                                    }
+//                                    showNotice(ErrorValue);
+//                                } else {
+//                                    apiResponse.onTaskCompleted(responseObj);
+//                                }
+//                            } catch (JSONException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    });
+//
+//                } catch (JSONException e) {
+//                    Log.e(mActivity.getPackageName(), "API responseObj is NULL");
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//        };
+//    }
+//
+//
+//
+//    public JSONObject Post(String ClassName, String MethodName, Map<String, String> postParams, String postFileName) throws IOException {
+//        JSONObject jsonObj = null;
+//        getApiUrlRequest(ClassName, MethodName, new HashMap<String, String>());
+//
+//        MultipartBody.Builder builder = new MultipartBody.Builder();
+//        builder.setType(MultipartBody.FORM);
+//        for (Map.Entry param : postParams.entrySet()) {
+//            builder.addFormDataPart(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
+//        }
+//        if(postFileName != null && !postFileName.isEmpty()) {
+//            builder.addFormDataPart("image", postFileName, RequestBody.create(MEDIA_TYPE_JPG, new File(postFileName)));
+//        }
+//        RequestBody requestBody = builder.build();
+//
+//        Request request = new Request.Builder()
+//                .url(this.ApiUrlRequest)
+//                .post(requestBody)
+//                .build();
+//        this.ApiUrlRequest = null;
+//
+//        // TODO: Catch SocketTimeoutException
+//        Response response = client.newCall(request).execute();
+//        if (!response.isSuccessful())
+//            throw new IOException("Unexpected code " + response);
+//
+//        try {
+//            jsonObj = new JSONObject(response.body().string());
+//        } catch (JSONException e) {
+//            showError("API.Post server error");
+//        }
+//
+//        Log.d(TAG, String.valueOf(jsonObj));
+//        return jsonObj;
+//    }
+//
+//
+//}
