@@ -27,7 +27,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-class API {
+public class API {
 
     private static final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpeg");
 
@@ -42,8 +42,15 @@ class API {
 
     private static final String TAG = "API";
 
-    public API(Activity _mActivity) {
+    public interface ApiResponse {
+        void onTaskCompleted(JSONObject output);
+    }
+
+    public ApiResponse apiResponse = null;
+
+    public API(Activity _mActivity, ApiResponse _apiResponse) {
         mActivity = _mActivity;
+        apiResponse = _apiResponse;
 
         client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
@@ -55,7 +62,8 @@ class API {
         UserToken = Session.Get("UserToken");
         callback = new Callback() {
 
-            private JSONObject jsonObj;
+            public JSONObject responseObj;
+            public ApiResponse apiResponse = null;
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -65,21 +73,23 @@ class API {
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
                 try {
-                    jsonObj = new JSONObject(response.body().string());
-                    Log.d(TAG, String.valueOf(jsonObj));
+                    responseObj = new JSONObject(response.body().string());
+                    Log.d(TAG, String.valueOf(responseObj));
 
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                String isError = jsonObj.getString("Error");
+                                String isError = responseObj.getString("Error");
                                 if (isError.equals("1")) {
                                     String ErrorValue = "";
-                                    JSONArray Errors = jsonObj.getJSONArray("Errors");
+                                    JSONArray Errors = responseObj.getJSONArray("Errors");
                                     for (int i = 0; i < Errors.length(); i++) {
                                         ErrorValue = ErrorValue + Errors.getJSONObject(i).getString("Error") + "\n";
                                     }
                                     showNotice(ErrorValue);
+                                } else {
+                                    apiResponse.onTaskCompleted(responseObj);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -88,7 +98,7 @@ class API {
                     });
 
                 } catch (JSONException e) {
-                    Log.e(mActivity.getPackageName(), "API jsonObj is NULL");
+                    Log.e(mActivity.getPackageName(), "API responseObj is NULL");
                     e.printStackTrace();
                 }
             }

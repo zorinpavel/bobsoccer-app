@@ -7,23 +7,28 @@ import android.view.View;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
+public class MainActivity extends Activity implements API.ApiResponse {
 
-public class MainActivity extends Activity {
-
-    private API Api;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Api = new API(this);
-        Api.Get("Users", "GetUser");
-//        Log.d(this.getPackageName(), "jsonObj:" + String.valueOf(jsonObj));
+        new API(this, new API.ApiResponse() {
+            @Override
+            public void onTaskCompleted(JSONObject jsonObj){
+                Log.d(TAG, "Api.jsonObj:" + String.valueOf(jsonObj));
+            }
+        }).Get("Users", "GetUser");
     }
 
     public void buttonClick(View view) {
-        Api.Get("Blog", "GetUser");
+    }
+
+    @Override
+    public void onTaskCompleted(JSONObject output) {
+
     }
 }
