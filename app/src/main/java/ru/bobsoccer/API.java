@@ -9,20 +9,22 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
-import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
@@ -41,7 +43,7 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
         void onTaskCompleted(JSONObject output);
     }
 
-    public Activity mActivity = null;
+    private Activity mActivity = null;
     public ApiResponse apiResponse = null;
     public String requestMethod = "GET";
     public String ClassName = null;
@@ -51,9 +53,9 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
         this.mActivity = _mActivity;
         this.apiResponse = _apiResponse;
         this.client = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS)
                 .build();
         this.requestMethod = _requestMethod;
         this.ClassName = _ClassName;
@@ -69,15 +71,16 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
         pDialog.show();
     }
 
+    @SafeVarargs
     @Override
-    protected JSONObject doInBackground(Map<String, String>... requestParams) {
+    protected final JSONObject doInBackground(Map<String, String>... requestParams) {
         Map<String, String> params = new HashMap<>();
-        for (Map.Entry param : requestParams[0].entrySet()) {
-            params.put(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
-        }
-        if(params.size() <= 0 )
+        if(requestParams.length > 0  ) {
+            for (Map.Entry param : requestParams[0].entrySet()) {
+                params.put(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
+            }
             return Get(this.ClassName, this.MethodName, params);
-        else
+        } else
             return Get(this.ClassName, this.MethodName);
     }
 
@@ -116,9 +119,76 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
 
         Request request = new Request.Builder()
                 .header("User-Agent", GetUserAgent())
+                .header("Authorization", "Bearer " + Session.Token)
                 .url(ApiUrlRequest)
                 .build();
-        ApiUrlRequest = null;
+
+        Response response;
+        JSONObject jsonObj = null;
+        try {
+            response = this.client.newCall(request).execute();
+            jsonObj = new JSONObject(response.body().string());
+            ApiUrlRequest = null;
+        } catch (IOException e) {
+            this.mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (getStatus() == Status.RUNNING) {
+                        cancel(true);
+                        if (pDialog.isShowing())
+                            pDialog.dismiss();
+                    }
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                    builder.setTitle("Timeout error")
+                            .setMessage("Sorry server doesn't response!\nCheck your internet connection or try again.")
+                            .setCancelable(true)
+                            .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Log.d(TAG, "load again");
+                                }
+                            }).setIcon(android.R.drawable.ic_dialog_alert);
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+            });
+        } catch (JSONException e) {
+            this.mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (getStatus() == Status.RUNNING) {
+                        cancel(true);
+                        if (pDialog.isShowing())
+                            pDialog.dismiss();
+                    }
+                    showError("API.Get server error");
+                }
+            });
+        }
+
+        Log.d(TAG, String.valueOf(jsonObj));
+        return jsonObj;
+    }
+
+    public JSONObject Post(String ClassName, String MethodName, Map<String, String> postParams, String postFileName) {
+        getApiUrlRequest(ClassName, MethodName, new HashMap<String, String>());
+
+        MultipartBody.Builder builder = new MultipartBody.Builder();
+        builder.setType(MultipartBody.FORM);
+        for (Map.Entry param : postParams.entrySet()) {
+            builder.addFormDataPart(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
+        }
+        if(postFileName != null && !postFileName.isEmpty()) {
+            builder.addFormDataPart("image", postFileName, RequestBody.create(MEDIA_TYPE_JPG, new File(postFileName)));
+        }
+        RequestBody requestBody = builder.build();
+
+        Request request = new Request.Builder()
+                .url(this.ApiUrlRequest)
+                .post(requestBody)
+                .build();
+        this.ApiUrlRequest = null;
 
         Response response;
         JSONObject jsonObj = null;
@@ -126,7 +196,8 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
             response = this.client.newCall(request).execute();
             jsonObj = new JSONObject(response.body().string());
         } catch (JSONException | IOException e) {
-            showError("Api.Get server error");
+            e.printStackTrace();
+            showError("API.Post server error");
         }
 
         Log.d(TAG, String.valueOf(jsonObj));
@@ -144,26 +215,29 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     }
 
     private String GetUserAgent() {
-        PackageManager manager = mActivity.getPackageManager();
+        PackageManager manager = this.mActivity.getPackageManager();
         PackageInfo info;
         String UserAgentName = "";
         try {
-            info = manager.getPackageInfo(mActivity.getPackageName(), 0);
-            UserAgentName = info.packageName + " " + info.versionName + " Android: " + Build.VERSION.RELEASE + " " + Build.VERSION.CODENAME + " " + Build.VERSION.SDK_INT + " (" + Build.MANUFACTURER + " " + Build.MODEL + ")";
+            info = manager.getPackageInfo(this.mActivity.getPackageName(), 0);
+            UserAgentName = info.packageName + "/" + info.versionName + " (" + Build.MANUFACTURER + "/" + Build.MODEL + ")" + " Android/" + Build.VERSION.RELEASE + " " + Build.VERSION.CODENAME + " " + Build.VERSION.SDK_INT;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
         return UserAgentName;
     }
 
+
+    // TODO use Handler
     public void showError(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.mActivity);
         builder.setMessage(message)
                 .setTitle("Ошибка")
                 .setCancelable(false)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mActivity.finish();
+                        if(!mActivity.getLocalClassName().equals("MainActivity"))
+                            mActivity.finish();
                     }
                 }).setIcon(android.R.drawable.ic_dialog_alert);
         AlertDialog alert = builder.create();
@@ -171,7 +245,7 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     }
 
     public void showNotice(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.mActivity);
         builder.setMessage(message)
                 .setTitle("Предупреждение")
                 .setCancelable(false)
@@ -185,101 +259,3 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     }
 
 }
-
-//    public Activity mActivity;
-//    public static Session Session;
-//    public static String UserToken;
-//    public Callback callback;
-//
-//
-//
-//    public API(Activity _mActivity, ApiResponse _apiResponse) {
-//
-//
-//        Session = new Session(mActivity);
-//        UserToken = Session.Get("UserToken");
-//        callback = new Callback() {
-//
-//            public JSONObject responseObj;
-//            public ApiResponse apiResponse = null;
-//
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, final Response response) throws IOException {
-//                try {
-//                    responseObj = new JSONObject(response.body().string());
-//                    Log.d(TAG, String.valueOf(responseObj));
-//
-//                    mActivity.runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            try {
-//                                String isError = responseObj.getString("Error");
-//                                if (isError.equals("1")) {
-//                                    String ErrorValue = "";
-//                                    JSONArray Errors = responseObj.getJSONArray("Errors");
-//                                    for (int i = 0; i < Errors.length(); i++) {
-//                                        ErrorValue = ErrorValue + Errors.getJSONObject(i).getString("Error") + "\n";
-//                                    }
-//                                    showNotice(ErrorValue);
-//                                } else {
-//                                    apiResponse.onTaskCompleted(responseObj);
-//                                }
-//                            } catch (JSONException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    });
-//
-//                } catch (JSONException e) {
-//                    Log.e(mActivity.getPackageName(), "API responseObj is NULL");
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//        };
-//    }
-//
-//
-//
-//    public JSONObject Post(String ClassName, String MethodName, Map<String, String> postParams, String postFileName) throws IOException {
-//        JSONObject jsonObj = null;
-//        getApiUrlRequest(ClassName, MethodName, new HashMap<String, String>());
-//
-//        MultipartBody.Builder builder = new MultipartBody.Builder();
-//        builder.setType(MultipartBody.FORM);
-//        for (Map.Entry param : postParams.entrySet()) {
-//            builder.addFormDataPart(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
-//        }
-//        if(postFileName != null && !postFileName.isEmpty()) {
-//            builder.addFormDataPart("image", postFileName, RequestBody.create(MEDIA_TYPE_JPG, new File(postFileName)));
-//        }
-//        RequestBody requestBody = builder.build();
-//
-//        Request request = new Request.Builder()
-//                .url(this.ApiUrlRequest)
-//                .post(requestBody)
-//                .build();
-//        this.ApiUrlRequest = null;
-//
-//        // TODO: Catch SocketTimeoutException
-//        Response response = client.newCall(request).execute();
-//        if (!response.isSuccessful())
-//            throw new IOException("Unexpected code " + response);
-//
-//        try {
-//            jsonObj = new JSONObject(response.body().string());
-//        } catch (JSONException e) {
-//            showError("API.Post server error");
-//        }
-//
-//        Log.d(TAG, String.valueOf(jsonObj));
-//        return jsonObj;
-//    }
-//
-//
-//}
