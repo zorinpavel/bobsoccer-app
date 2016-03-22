@@ -1,42 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.v4.widget.DrawerLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/DrawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ru.bobsoccer.MainActivity">
+    android:elevation="7dp">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Text"
-            android:id="@+id/tokenView" />
+        <include android:id="@+id/toolbar" layout="@layout/toolbar" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Text"
-            android:id="@+id/textView" />
+        <LinearLayout
+            android:layout_below="@+id/toolbar"
+            android:layout_marginTop="@dimen/frame_margin_top"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New request"
-            android:id="@+id/button"
-            android:onClick="buttonClick"
-            style="@style/ButtonGreen" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:id="@+id/tokenView" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SetUser admin"
-            android:id="@+id/button2"
-            android:onClick="setuserClick"
-            style="@style/ButtonGreen" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:id="@+id/textView" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New request"
+                android:id="@+id/button"
+                android:onClick="buttonClick" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SetUser admin"
+                android:id="@+id/button2"
+                android:onClick="setuserClick" />
+        </LinearLayout>
+
     </LinearLayout>
 
-</RelativeLayout>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RecyclerView"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:background="#ffffff"
+        android:scrollbars="vertical"/>
+
+</android.support.v4.widget.DrawerLayout>

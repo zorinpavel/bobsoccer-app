@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="Theme.Bobsoccer" parent="Theme.AppCompat.Light.NoActionBar" >
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorPrimary">@color/ColorPrimary</item>
+        <item name="colorPrimaryDark">@color/ColorPrimaryDark</item>
+        <item name="android:actionMenuTextColor">@color/toolbarTextColor</item>
+    </style>
+
+</resources>

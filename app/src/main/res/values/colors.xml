@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#727272</color>
-    <color name="accent_bobsoccer_light">#d3c47f</color>
+    <color name="ColorPrimary">#76787a</color>          <!-- панель -->
+    <color name="ColorPrimaryDark">#727272</color>      <!-- текст -->
+    <color name="toolbarTextColor">#dfdfdf</color>      <!-- текст на панели -->
 
-    <color name="green_color">#2f9407</color>
+    <color name="darkGray">#5f5f5f</color>              <!-- темная панель -->
+    <color name="lightGreen">#8cc63e</color>            <!-- выделенный пункт меню -->
+    <color name="darkGreen">#1b5e20</color>
 
 </resources>
