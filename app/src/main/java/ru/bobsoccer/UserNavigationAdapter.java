@@ -1,5 +1,6 @@
 package ru.bobsoccer;
 
+import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,27 +8,35 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import ru.bobsoccer.model.User;
+
 public class UserNavigationAdapter extends RecyclerView.Adapter<UserNavigationAdapter.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
 
-    private String mTitles[];
-    private int mIcons[];
+    private String UserTitles[] = {"Выход",};
+    private int UserIcons[] = {
+        R.drawable.ic_off,
+    };
 
-    private String name;
-    private int profile;
-    private String email;
-
+    private Activity mActivity;
+    private User currentUser;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         int HolderId;
 
-        TextView textView;
         ImageView imageView;
-        ImageView profile;
-        TextView Name;
-        TextView email;
+        TextView textView;
+
+        ImageView avatar;
+        TextView login;
+        TextView mail;
+        ImageView Level;
+        TextView Lev_Points;
+        TextView Prev_Points;
 
 
         public ViewHolder(View itemView, int ViewType) {
@@ -38,9 +47,12 @@ public class UserNavigationAdapter extends RecyclerView.Adapter<UserNavigationAd
                 imageView = (ImageView) itemView.findViewById(R.id.rowIcon);
                 HolderId = 1;
             } else {
-                Name = (TextView) itemView.findViewById(R.id.name);
-                email = (TextView) itemView.findViewById(R.id.email);
-                profile = (ImageView) itemView.findViewById(R.id.circleView);
+                avatar = (ImageView) itemView.findViewById(R.id.avatar);
+                login = (TextView) itemView.findViewById(R.id.login);
+                mail = (TextView) itemView.findViewById(R.id.mail);
+                Level = (ImageView) itemView.findViewById(R.id.Level);
+                Lev_Points = (TextView) itemView.findViewById(R.id.Lev_Points);
+                Prev_Points = (TextView) itemView.findViewById(R.id.Prev_Points);
                 HolderId = 0;
             }
         }
@@ -49,14 +61,14 @@ public class UserNavigationAdapter extends RecyclerView.Adapter<UserNavigationAd
     }
 
 
-    UserNavigationAdapter(String Titles[], int Icons[], String Name, String Email, int Profile) {
-        mTitles = Titles;
-        mIcons = Icons;
-        name = Name;
-        email = Email;
-        profile = Profile;
+    UserNavigationAdapter(Activity context) {
+        mActivity = context;
     }
 
+    public void updateData(User _currentUser) {
+        currentUser = _currentUser;
+        notifyDataSetChanged();
+    }
 
     @Override
     public UserNavigationAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -69,7 +81,7 @@ public class UserNavigationAdapter extends RecyclerView.Adapter<UserNavigationAd
         } else if (viewType == TYPE_HEADER) {
 
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_navigation_header, parent, false);
-            return new ViewHolder(v,viewType);
+            return new ViewHolder(v, viewType);
 
         }
 
@@ -79,18 +91,21 @@ public class UserNavigationAdapter extends RecyclerView.Adapter<UserNavigationAd
     @Override
     public void onBindViewHolder(UserNavigationAdapter.ViewHolder holder, int position) {
         if(holder.HolderId == 1) {
-            holder.textView.setText(mTitles[position - 1]);
-            holder.imageView.setImageResource(mIcons[position -1]);
+            holder.textView.setText(UserTitles[position - 1]);
+            holder.imageView.setImageResource(UserIcons[position -1]);
         } else {
-            holder.profile.setImageResource(profile);           // Similarly we set the resources for header view
-            holder.Name.setText(name);
-            holder.email.setText(email);
+            Picasso.with(mActivity)
+                    .load(API.DomainUrl + currentUser.avatar)
+                    .error(R.drawable.ic_toolbar_account_circle)
+                    .into(holder.avatar);
+            holder.login.setText(currentUser.login);
+            holder.mail.setText(currentUser.mail);
         }
     }
 
     @Override
     public int getItemCount() {
-        return mTitles.length + 1;
+        return UserTitles.length + 1;
     }
 
 

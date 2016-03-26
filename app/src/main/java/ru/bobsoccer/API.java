@@ -8,6 +8,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -35,9 +36,13 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     private ProgressDialog pDialog;
 
     private OkHttpClient client;
-    private static final String ApiHostName = "api.bobsoccer.ru";
-    private static final String ApiUrlBase = "http://" + ApiHostName;
+    public static final String DomainUrl = "http://bobsoccer.ru";
+    public static final String ApiHostName = "api.bobsoccer.ru";
+    public static final String ApiUrlBase = "http://" + ApiHostName;
     private String ApiUrlRequest = null;
+
+    private Boolean hiddenDialog = false;
+    private Map<String, String> requestParams = new HashMap<>();
 
     public interface ApiResponse {
         void onTaskCompleted(JSONObject output);
@@ -65,31 +70,31 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        pDialog = new ProgressDialog(this.mActivity);
-        pDialog.setMessage("Загрузка ...");
-        pDialog.setCancelable(false);
-        pDialog.show();
+        if (!this.hiddenDialog) {
+            pDialog = new ProgressDialog(this.mActivity);
+            pDialog.setMessage("Загрузка ...");
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
     }
 
     @SafeVarargs
     @Override
-    protected final JSONObject doInBackground(Map<String, String>... requestParams) {
-        Map<String, String> params = new HashMap<>();
-        if(requestParams.length > 0  ) {
-            for (Map.Entry param : requestParams[0].entrySet()) {
-                params.put(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
-            }
-            return Get(this.ClassName, this.MethodName, params);
-        } else
-            return Get(this.ClassName, this.MethodName);
+    protected final JSONObject doInBackground(@Nullable Map<String, String>... params) {
+        if (requestParams.size() > 0) {
+            return Get(this.ClassName, this.MethodName, this.requestParams);
+        }
+        return Get(this.ClassName, this.MethodName);
     }
 
     @Override
     protected void onPostExecute(JSONObject resultObj) {
         super.onPostExecute(resultObj);
 
-        if (pDialog.isShowing())
-            pDialog.dismiss();
+        if (!this.hiddenDialog) {
+            if (pDialog.isShowing())
+                pDialog.dismiss();
+        }
 
         try {
             String isError = resultObj.getString("Error");
@@ -135,8 +140,10 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                 public void run() {
                     if (getStatus() == Status.RUNNING) {
                         cancel(true);
-                        if (pDialog.isShowing())
-                            pDialog.dismiss();
+                        if(!hiddenDialog) {
+                            if (pDialog.isShowing())
+                                pDialog.dismiss();
+                        }
                     }
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
@@ -159,8 +166,10 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                 public void run() {
                     if (getStatus() == Status.RUNNING) {
                         cancel(true);
-                        if (pDialog.isShowing())
-                            pDialog.dismiss();
+                        if (!hiddenDialog) {
+                            if (pDialog.isShowing())
+                                pDialog.dismiss();
+                        }
                     }
                     showError("API.Get server error");
                 }
@@ -256,6 +265,18 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                 }).setIcon(android.R.drawable.ic_dialog_info);
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    public API setHiddenDialog() {
+        this.hiddenDialog = true;
+        return this;
+    }
+
+    public API requestParams(Map<String, String> params) {
+        for (Map.Entry param : params.entrySet()) {
+            requestParams.put(String.valueOf(param.getKey()), String.valueOf(param.getValue()));
+        }
+        return this;
     }
 
 }
