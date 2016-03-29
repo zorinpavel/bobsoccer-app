@@ -1,6 +1,9 @@
 package ru.bobsoccer;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -11,11 +14,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.HeaderViewListAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +31,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 @SuppressWarnings("unchecked")
-public abstract class BaseActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public abstract class BaseActivity extends AppCompatActivity implements
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        NavigationView.OnNavigationItemSelectedListener {
 
     private final String TAG = "bobsoccer";
 
@@ -44,8 +54,8 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
     private Toolbar mToolbar;
     private NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private Session activitySession;
+
+    public Session activitySession;
 
     // list of navdrawer items that were actually added to the navdrawer, in order
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<>();
@@ -85,9 +95,8 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
                     activitySession.SetObject("currentUser", rUser);
 
                     setupNavDrawer();
-//                    if(Integer.parseInt(rUser.getString("us_id")) > 0) {
-//
-//                    }
+                    setupAccauntBox();
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -100,6 +109,22 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
         tokenView.setText(String.valueOf(Session.Token));
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private void setupNavDrawer() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setTitle(null);
@@ -109,12 +134,13 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
         if (mDrawerLayout == null) {
             return;
         }
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open_drawer, R.string.close_drawer) {
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open_drawer, R.string.close_drawer) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 // code here will execute once the drawer is opened
             }
+
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -132,6 +158,7 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
         }
 
         mNavigationView = (NavigationView) findViewById(R.id.user_navigation_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
         createNavDrawerItems();
 
@@ -144,7 +171,7 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
         Log.d(TAG, String.valueOf(currentUser));
         mNavDrawerItems.add(0);
 
-        if(currentUser.us_id > 0)
+        if (currentUser.us_id > 0)
             mNavDrawerItems.add(1);
         mNavDrawerItems.add(2);
 
@@ -153,13 +180,12 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
             navigationMenu.add(NAVDRAWER_TITLE_RES_ID[itemId]);
         }
 
+//        for (int itemId : mNavDrawerItems) {
+//            navigationMenu.findItem(itemId).setIcon(NAVDRAWER_ICON_RES_ID[itemId]);
+//            navigationMenu.findItem(itemId).setChecked(getSelfNavDrawerItem() == itemId);
+//        }
+
         for (int i = 0, count = mNavigationView.getChildCount(); i < count; i++) {
-
-            navigationMenu.findItem(i).setIcon(NAVDRAWER_ICON_RES_ID[i]);
-            navigationMenu.findItem(i).setChecked(getSelfNavDrawerItem() == i);
-
-            Log.d(TAG, getSelfNavDrawerItem() + " == " + i + " (" + count + ")");
-
             final View child = mNavigationView.getChildAt(i);
             if (child != null && child instanceof ListView) {
                 final ListView menuView = (ListView) child;
@@ -176,7 +202,75 @@ public abstract class BaseActivity extends AppCompatActivity implements SharedPr
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d(TAG, key);
+    }
 
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        mDrawerLayout.closeDrawers();
+        item.setChecked(true);
+        return true;
+    }
+
+    private void setupAccauntBox() {
+        User currentUser = activitySession.GetObject("currentUser", User.class);
+
+        if (currentUser.us_id > 0) {
+            Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    BitmapDrawable icon = new BitmapDrawable(mToolbar.getResources(), bitmap);
+                    mToolbar.setNavigationIcon(icon);
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+            };
+
+            Picasso.with(mToolbar.getContext())
+                    .load(API.DomainUrl + String.valueOf(currentUser.userpic))
+                    .placeholder(R.drawable.ic_toolbar_account_circle)
+                    .resize(80, 80)
+                    .transform(new CircleTransform())
+                    .into(target);
+
+        TextView login = (TextView) findViewById(R.id.login);
+        login.setText(currentUser.login);
+        login.setTextColor(getResources().getColor(R.color.theme_red_dark));
+//
+        TextView mail = (TextView) findViewById(R.id.mail);
+        mail.setText(currentUser.mail);
+
+        TextView Lev_Points = (TextView) findViewById(R.id.Lev_Points);
+        Lev_Points.setText(String.valueOf(currentUser.Lev_Points));
+
+        TextView Prev_Points = (TextView) findViewById(R.id.Prev_Points);
+        Prev_Points.setText((currentUser.Dif_Points >= 0 ? "+" : "-") + String.valueOf(currentUser.Dif_Points));
+        Prev_Points.setTextColor(getResources().getColor(currentUser.Color_Points));
+
+        if(currentUser.Level > 0) {
+            ImageView Level = (ImageView) findViewById(R.id.Level);
+            Picasso.with(getApplicationContext())
+                    .load(API.DomainUrl + "/img/fishka/big/level_" + String.valueOf(currentUser.Level) + ".png")
+                    .resize(30, 30)
+                    .into(Level);
+        }
+
+        ImageView avatar = (ImageView) findViewById(R.id.avatar);
+        Picasso.with(getApplicationContext())
+                .load(API.DomainUrl + String.valueOf(currentUser.avatar))
+                .placeholder(R.drawable.ic_toolbar_account_circle)
+                .resize(120, 120)
+                .transform(new CircleTransform())
+                .into(avatar);
+
+        }
     }
 
 }

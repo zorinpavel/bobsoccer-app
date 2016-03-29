@@ -36,11 +36,11 @@
                     android:text="Login"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/theme_red_dark" />
+                    android:textColor="@color/theme_login_red" />
 
                 <ImageView
-                    android:layout_width="18sp"
-                    android:layout_height="18sp"
+                    android:layout_width="24sp"
+                    android:layout_height="24sp"
                     android:id="@+id/Level"
                     android:layout_marginLeft="10dp"
                     android:contentDescription="Level" />
