@@ -19,7 +19,7 @@
             android:id="@+id/avatar" />
 
         <LinearLayout
-            android:layout_width="150dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginLeft="16dp">
@@ -36,7 +36,7 @@
                     android:text="Login"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/darkRed" />
+                    android:textColor="@color/theme_red_dark" />
 
                 <ImageView
                     android:layout_width="18sp"
@@ -44,6 +44,32 @@
                     android:id="@+id/Level"
                     android:layout_marginLeft="10dp"
                     android:contentDescription="Level" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginLeft="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="12sp"
+                        android:id="@+id/Lev_Points"
+                        android:singleLine="false" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+0"
+                        android:textSize="12sp"
+                        android:id="@+id/Prev_Points"
+                        android:layout_marginLeft="5dp"
+                        android:textColor="@color/theme_green_dark"
+                        android:singleLine="false" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -57,22 +83,6 @@
                 android:textStyle="italic" />
 
         </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"
-            android:textSize="12sp"
-            android:id="@+id/Lev_Points" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="+0"
-            android:textSize="12sp"
-            android:id="@+id/Prev_Points"
-            android:layout_marginLeft="5dp"
-            android:textColor="@color/darkGreen" />
 
     </LinearLayout>
 

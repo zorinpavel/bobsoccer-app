@@ -49,29 +49,29 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     }
 
     private Activity mActivity = null;
-    public ApiResponse apiResponse = null;
-    public String requestMethod = "GET";
-    public String ClassName = null;
-    public String MethodName = null;
+    private ApiResponse apiResponse = null;
+    private String requestMethod = "GET";
+    private String ClassName = null;
+    private String MethodName = null;
 
     public API(Activity _mActivity, ApiResponse _apiResponse, String _requestMethod, String _ClassName, String _MethodName) {
-        this.mActivity = _mActivity;
-        this.apiResponse = _apiResponse;
-        this.client = new OkHttpClient.Builder()
+        mActivity = _mActivity;
+        apiResponse = _apiResponse;
+        client = new OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
                 .writeTimeout(15, TimeUnit.SECONDS)
                 .build();
-        this.requestMethod = _requestMethod;
-        this.ClassName = _ClassName;
-        this.MethodName = _MethodName;
+        requestMethod = _requestMethod;
+        ClassName = _ClassName;
+        MethodName = _MethodName;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (!this.hiddenDialog) {
-            pDialog = new ProgressDialog(this.mActivity);
+        if (!hiddenDialog) {
+            pDialog = new ProgressDialog(mActivity);
             pDialog.setMessage("Загрузка ...");
             pDialog.setCancelable(false);
             pDialog.show();
@@ -82,16 +82,16 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     @Override
     protected final JSONObject doInBackground(@Nullable Map<String, String>... params) {
         if (requestParams.size() > 0) {
-            return Get(this.ClassName, this.MethodName, this.requestParams);
+            return Get(ClassName, MethodName, requestParams);
         }
-        return Get(this.ClassName, this.MethodName);
+        return Get(ClassName, MethodName);
     }
 
     @Override
     protected void onPostExecute(JSONObject resultObj) {
         super.onPostExecute(resultObj);
 
-        if (!this.hiddenDialog) {
+        if (!hiddenDialog) {
             if (pDialog.isShowing())
                 pDialog.dismiss();
         }
@@ -131,11 +131,11 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
         Response response;
         JSONObject jsonObj = null;
         try {
-            response = this.client.newCall(request).execute();
+            response = client.newCall(request).execute();
             jsonObj = new JSONObject(response.body().string());
             ApiUrlRequest = null;
         } catch (IOException e) {
-            this.mActivity.runOnUiThread(new Runnable() {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if (getStatus() == Status.RUNNING) {
@@ -161,7 +161,7 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                 }
             });
         } catch (JSONException e) {
-            this.mActivity.runOnUiThread(new Runnable() {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if (getStatus() == Status.RUNNING) {
@@ -194,15 +194,15 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
         RequestBody requestBody = builder.build();
 
         Request request = new Request.Builder()
-                .url(this.ApiUrlRequest)
+                .url(ApiUrlRequest)
                 .post(requestBody)
                 .build();
-        this.ApiUrlRequest = null;
+        ApiUrlRequest = null;
 
         Response response;
         JSONObject jsonObj = null;
         try {
-            response = this.client.newCall(request).execute();
+            response = client.newCall(request).execute();
             jsonObj = new JSONObject(response.body().string());
         } catch (JSONException | IOException e) {
             e.printStackTrace();
@@ -214,21 +214,21 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     }
 
     public void getApiUrlRequest(String ClassName, String MethodName, Map<String, String> params) {
-        this.ApiUrlRequest = ApiUrlBase + "/" + ClassName + "." + MethodName;
+        ApiUrlRequest = ApiUrlBase + "/" + ClassName + "." + MethodName;
 
         for (Map.Entry entry : params.entrySet()) {
-            this.ApiUrlRequest = this.ApiUrlRequest + "&" + entry.getKey() + "=" + entry.getValue();
+            ApiUrlRequest = ApiUrlRequest + "&" + entry.getKey() + "=" + entry.getValue();
         }
-        Log.d(TAG, this.ApiUrlRequest);
+        Log.d(TAG, ApiUrlRequest);
 
     }
 
     private String GetUserAgent() {
-        PackageManager manager = this.mActivity.getPackageManager();
+        PackageManager manager = mActivity.getPackageManager();
         PackageInfo info;
         String UserAgentName = "";
         try {
-            info = manager.getPackageInfo(this.mActivity.getPackageName(), 0);
+            info = manager.getPackageInfo(mActivity.getPackageName(), 0);
             UserAgentName = info.packageName + "/" + info.versionName + " (" + Build.MANUFACTURER + "/" + Build.MODEL + ")" + " Android/" + Build.VERSION.RELEASE + " " + Build.VERSION.CODENAME + " " + Build.VERSION.SDK_INT;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -239,7 +239,7 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
 
     // TODO use Handler
     public void showError(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.mActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setMessage(message)
                 .setTitle("Ошибка")
                 .setCancelable(false)
@@ -254,7 +254,7 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     }
 
     public void showNotice(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.mActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setMessage(message)
                 .setTitle("Предупреждение")
                 .setCancelable(false)
@@ -268,7 +268,7 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     }
 
     public API setHiddenDialog() {
-        this.hiddenDialog = true;
+        hiddenDialog = true;
         return this;
     }
 
