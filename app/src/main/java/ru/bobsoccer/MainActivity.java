@@ -1,34 +1,93 @@
 package ru.bobsoccer;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends Activity implements API.ApiResponse {
+import java.util.HashMap;
+import java.util.Map;
 
-    private static final String TAG = "MainActivity";
+@SuppressWarnings("unchecked")
+public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        new API(this, new API.ApiResponse() {
-            @Override
-            public void onTaskCompleted(JSONObject jsonObj){
-                Log.d(TAG, "Api.jsonObj:" + String.valueOf(jsonObj));
-            }
-        }).Get("Users", "GetUser");
-    }
-
-    public void buttonClick(View view) {
+//
+//        mNavigationView = (NavigationView) findViewById(R.id.user_navigation_view);
+//        mNavigationView.setNavigationItemSelectedListener(
+//                new NavigationView.OnNavigationItemSelectedListener() {
+//                    @Override
+//                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+//                        int id = menuItem.getItemId();
+//                        switch(id) {
+//                            case  R.id.nav_enter:
+////                                Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
+////                                startActivity(loginIntent);
+//                                break;
+//                        }
+//                        mDrawerLayout.closeDrawers();
+//                        return true;
+//                    }
+//                });
+//
+//
     }
 
     @Override
-    public void onTaskCompleted(JSONObject output) {
-
+    protected int getSelfNavDrawerItem() {
+        return 0;//NAVDRAWER_ITEM_MAIN;
     }
+
+    public void buttonClick(View view) {
+        Map<String, String> params = new HashMap<>();
+        params.put("paramKey", "paramValue");
+        new API(this, new API.ApiResponse() {
+            @Override
+            public void onTaskCompleted(JSONObject resultObj) {
+                TextView tView = (TextView) findViewById(R.id.textView);
+                JSONObject User;
+                try {
+                    User = resultObj.getJSONObject("User");
+                    tView.setText(String.valueOf(User));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "GET", "Users", "GetUser")
+                .requestParams(params)
+                .execute();
+    }
+
+    public void setuserClick(View view) {
+        Map<String, String> params = new HashMap<>();
+        params.put("login", "Pashtet");
+        params.put("pass", "paafoos");
+        new API(this, new API.ApiResponse() {
+            @Override
+            public void onTaskCompleted(JSONObject resultObj) {
+                TextView tView = (TextView) findViewById(R.id.textView);
+                JSONObject User;
+                try {
+                    String apiToken = resultObj.getString("Token");
+                    activitySession.SetToken(apiToken);
+                    TextView tokenView = (TextView) findViewById(R.id.tokenView);
+                    tokenView.setText(String.valueOf(Session.Token));
+
+                    User = resultObj.getJSONObject("User");
+                    tView.setText(String.valueOf(User));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "GET", "Users", "CheckValidEnter")
+                .requestParams(params)
+                .execute();
+    }
+
 }

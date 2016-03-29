@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="app_primary_accent">#f57c00</color>
+
+    <color name="app_primary">#757575</color>
+    <color name="app_primary_dark">#616161</color>
+
+    <color name="app_button_text">#ff008094</color>
+
+    <color name="theme_green_dark">#1b5e20</color>
+    <color name="theme_red_dark">#b71c1c</color>
+
+    <color name="theme_login_red">#d02823</color>
+
 </resources>
