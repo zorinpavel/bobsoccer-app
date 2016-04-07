@@ -7,10 +7,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -35,7 +37,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-    private final String TAG = "bobsoccer";
+    private final String TAG = "bobsoccer.BaseActivity";
 
     // titles for navdrawer items (indices must correspond to the above)
     private static final int[] NAVDRAWER_TITLE_RES_ID = new int[]{
@@ -68,19 +70,12 @@ public abstract class BaseActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activitySession = new Session(this);
-
-        ActionBar ab = getSupportActionBar();
-        if (ab != null) {
-            ab.setDisplayHomeAsUpEnabled(true);
-        }
-
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        Log.d(TAG, "onPostCreate");
-//        setupNavDrawer();
+        setupNavDrawer();
     }
 
     @Override
@@ -110,9 +105,18 @@ public abstract class BaseActivity extends AppCompatActivity implements
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_menu, menu);
-        return true;
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -129,6 +133,10 @@ public abstract class BaseActivity extends AppCompatActivity implements
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setTitle(null);
         setSupportActionBar(mToolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
@@ -161,11 +169,16 @@ public abstract class BaseActivity extends AppCompatActivity implements
         mNavigationView.setNavigationItemSelectedListener(this);
 
         createNavDrawerItems();
-
     }
 
     private void createNavDrawerItems() {
         mNavDrawerItems.clear();
+        final Menu navigationMenu = mNavigationView.getMenu();
+        navigationMenu.clear();
+
+//        navigationMenu.setGroupVisible(R.id.group_1, true)
+
+//        navigationMenu.inflateMenu(R.menu.second_menu);
 
         User currentUser = activitySession.GetObject("currentUser", User.class);
         Log.d(TAG, String.valueOf(currentUser));
@@ -175,9 +188,12 @@ public abstract class BaseActivity extends AppCompatActivity implements
             mNavDrawerItems.add(1);
         mNavDrawerItems.add(2);
 
-        final Menu navigationMenu = mNavigationView.getMenu();
         for (int itemId : mNavDrawerItems) {
             navigationMenu.add(NAVDRAWER_TITLE_RES_ID[itemId]);
+
+//            MenuItem menuItem = navigationMenu.getItem(itemId);
+//            menuItem.setIcon(NAVDRAWER_ICON_RES_ID[itemId]);
+//            menuItem.setChecked(getSelfNavDrawerItem() == itemId);
         }
 
 //        for (int itemId : mNavDrawerItems) {
@@ -208,8 +224,8 @@ public abstract class BaseActivity extends AppCompatActivity implements
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        mDrawerLayout.closeDrawers();
         item.setChecked(true);
+        mDrawerLayout.closeDrawers();
         return true;
     }
 

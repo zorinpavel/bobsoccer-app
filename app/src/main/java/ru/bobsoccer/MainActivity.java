@@ -1,6 +1,8 @@
 package ru.bobsoccer;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,30 +15,22 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class MainActivity extends BaseActivity {
 
+    private final String TAG = "bobsoccer.MainActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//
-//        mNavigationView = (NavigationView) findViewById(R.id.user_navigation_view);
-//        mNavigationView.setNavigationItemSelectedListener(
-//                new NavigationView.OnNavigationItemSelectedListener() {
-//                    @Override
-//                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-//                        int id = menuItem.getItemId();
-//                        switch(id) {
-//                            case  R.id.nav_enter:
-////                                Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
-////                                startActivity(loginIntent);
-//                                break;
-//                        }
-//                        mDrawerLayout.closeDrawers();
-//                        return true;
-//                    }
-//                });
-//
-//
+        if (savedInstanceState == null) {
+            Log.d(TAG, "savedInstanceState == null");
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            TabsFragment tabsFragment = new TabsFragment();
+            transaction.replace(R.id.tabs_frame, tabsFragment);
+            transaction.commit();
+        } else
+            Log.d(TAG, "savedInstanceState != null");
+
     }
 
     @Override

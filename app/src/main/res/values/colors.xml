@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <color name="app_primary">#76787a</color>
+    <color name="app_primary_dark">#000000</color>
     <color name="app_primary_accent">#f57c00</color>
 
-    <color name="app_primary">#757575</color>
-    <color name="app_primary_dark">#616161</color>
-
-    <color name="app_button_text">#ff008094</color>
 
     <color name="theme_green_dark">#1b5e20</color>
     <color name="theme_red_dark">#b71c1c</color>
 
     <color name="theme_login_red">#d02823</color>
+
+    <color name="theme_toolbar_background">#76787a</color>
+    <color name="theme_toolbar_text_color">#dfdfdf</color>
+
+    <color name="theme_tab">#E9E9E9</color>
+    <color name="theme_tab_highlight">#DFDFDF</color>
+    <color name="theme_tab_text_color">#727272</color>
 
 </resources>
