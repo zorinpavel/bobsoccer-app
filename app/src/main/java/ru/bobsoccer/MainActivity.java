@@ -1,8 +1,6 @@
 package ru.bobsoccer;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,21 +19,11 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (savedInstanceState == null) {
-            Log.d(TAG, "savedInstanceState == null");
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            TabsFragment tabsFragment = new TabsFragment();
-            transaction.replace(R.id.tabs_frame, tabsFragment);
-            transaction.commit();
-        } else
-            Log.d(TAG, "savedInstanceState != null");
-
     }
 
     @Override
     protected int getSelfNavDrawerItem() {
-        return 0;//NAVDRAWER_ITEM_MAIN;
+        return 0; //NAVDRAWER_ITEM_MAIN;
     }
 
     public void buttonClick(View view) {
@@ -49,6 +37,10 @@ public class MainActivity extends BaseActivity {
                 try {
                     User = resultObj.getJSONObject("User");
                     tView.setText(String.valueOf(User));
+
+                    TextView tokenView = (TextView) findViewById(R.id.tokenView);
+                    tokenView.setText(String.valueOf(Session.Token));
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -70,6 +62,7 @@ public class MainActivity extends BaseActivity {
                 try {
                     String apiToken = resultObj.getString("Token");
                     activitySession.SetToken(apiToken);
+
                     TextView tokenView = (TextView) findViewById(R.id.tokenView);
                     tokenView.setText(String.valueOf(Session.Token));
 

@@ -1,8 +1,8 @@
 package ru.bobsoccer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 
@@ -13,9 +13,11 @@ class Session {
     private Gson gson = new Gson();
 
     public static String Token;
+    private static final String PREFERENCES_FILE = "bobsoccer_settings";
 
     public Session(Activity context) {
-        Preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        Preferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+//        Preferences = PreferenceManager.getDefaultSharedPreferences(context);
         Token = Get("Token");
     }
 

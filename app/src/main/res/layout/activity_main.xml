@@ -7,52 +7,41 @@
     android:layout_height="match_parent"
     android:elevation="7dp">
 
-    <LinearLayout
+    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/tabs_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <include android:id="@+id/toolbar" layout="@layout/toolbar" />
-
-        <FrameLayout
-            android:id="@+id/tabs_frame"
-            android:layout_weight="2"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/tabs_appbar"
             android:layout_width="match_parent"
-            android:layout_height="0px" />
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <LinearLayout
-            android:orientation="vertical"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|enterAlways|snap"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Bobsoccer.TabLayout"/>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/tabs_viewpager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/tokenView" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/textView" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="New request"
-                android:id="@+id/button"
-                android:onClick="buttonClick" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="SetUser admin"
-                android:id="@+id/button2"
-                android:onClick="setuserClick" />
-        </LinearLayout>
-
-    </LinearLayout>
+    </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/user_navigation_view"

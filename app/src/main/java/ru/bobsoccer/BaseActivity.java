@@ -1,13 +1,20 @@
 package ru.bobsoccer;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,14 +22,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -31,6 +41,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("unchecked")
 public abstract class BaseActivity extends AppCompatActivity implements
@@ -54,8 +65,10 @@ public abstract class BaseActivity extends AppCompatActivity implements
     };
 
     private Toolbar mToolbar;
+    private ViewPager mViewPager;
     private NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
+    private Context mContext;
 
     public Session activitySession;
 
@@ -70,6 +83,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activitySession = new Session(this);
+        mContext = getApplicationContext();
     }
 
     @Override
@@ -99,9 +113,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
         }, "GET", "Users", "GetUser")
                 .setHiddenDialog()
                 .execute();
-
-        TextView tokenView = (TextView) findViewById(R.id.tokenView);
-        tokenView.setText(String.valueOf(Session.Token));
     }
 
     @Override
@@ -133,16 +144,49 @@ public abstract class BaseActivity extends AppCompatActivity implements
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setTitle(null);
         setSupportActionBar(mToolbar);
-
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
+
+        mViewPager = (ViewPager) findViewById(R.id.tabs_viewpager);
+        setupViewPager(mViewPager);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
+
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                mViewPager.setCurrentItem(tab.getPosition());
+                switch (tab.getPosition()) {
+                    case 0:
+                        Toast.makeText(mContext, "ONE", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 1:
+                        Toast.makeText(mContext, "TWO", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 2:
+                        Toast.makeText(mContext, "THREE", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
             return;
         }
-        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open_drawer, R.string.close_drawer) {
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, BaseActivity.this.mToolbar, R.string.open_drawer, R.string.close_drawer) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
@@ -155,9 +199,9 @@ public abstract class BaseActivity extends AppCompatActivity implements
                 // Code here will execute once drawer is closed
             }
         };
-        if (mToolbar != null) {
-            mToolbar.setNavigationIcon(R.drawable.ic_toolbar_account_circle);
-            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        if (this.mToolbar != null) {
+            this.mToolbar.setNavigationIcon(R.drawable.ic_toolbar_account_circle);
+            this.mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     mDrawerLayout.openDrawer(GravityCompat.START);
@@ -171,6 +215,62 @@ public abstract class BaseActivity extends AppCompatActivity implements
         createNavDrawerItems();
     }
 
+    private void setupViewPager(ViewPager viewPager) {
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPagerAdapter.addFrag(new DummyFragment(getResources().getColor(R.color.accent_material_light)), "Новости");
+        viewPagerAdapter.addFrag(new DummyFragment(getResources().getColor(R.color.theme_green_dark)), "Экспертное мнение");
+        viewPagerAdapter.addFrag(new DummyFragment(getResources().getColor(R.color.cardview_dark_background)), "Трибуна");
+        viewPager.setAdapter(viewPagerAdapter);
+    }
+
+    static class ViewPagerAdapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
+        public ViewPagerAdapter(FragmentManager manager) {
+            super(manager);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
+
+        public void addFrag(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitleList.get(position);
+        }
+    }
+
+    @SuppressLint("ValidFragment")
+    public class DummyFragment extends Fragment {
+        int color;
+
+        public DummyFragment() {
+        }
+
+        public DummyFragment(int color) {
+            this.color = color;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_base, container, false);
+            return view;
+        }
+    }
+
+
     private void createNavDrawerItems() {
         mNavDrawerItems.clear();
         final Menu navigationMenu = mNavigationView.getMenu();
@@ -181,10 +281,9 @@ public abstract class BaseActivity extends AppCompatActivity implements
 //        navigationMenu.inflateMenu(R.menu.second_menu);
 
         User currentUser = activitySession.GetObject("currentUser", User.class);
-        Log.d(TAG, String.valueOf(currentUser));
         mNavDrawerItems.add(0);
 
-        if (currentUser.us_id > 0)
+        if (currentUser != null && currentUser.us_id > 0)
             mNavDrawerItems.add(1);
         mNavDrawerItems.add(2);
 
@@ -232,7 +331,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
     private void setupAccauntBox() {
         User currentUser = activitySession.GetObject("currentUser", User.class);
 
-        if (currentUser.us_id > 0) {
+        if (currentUser != null && currentUser.us_id > 0) {
             Target target = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
