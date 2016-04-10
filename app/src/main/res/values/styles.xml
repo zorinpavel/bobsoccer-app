@@ -17,9 +17,14 @@
         <item name="android:background">@color/theme_toolbar_background</item>
         <item name="backgroundStacked">@color/theme_toolbar_background</item>
         <item name="backgroundSplit">@color/theme_toolbar_background</item>
+        <item name="titleTextStyle">@style/Bobsoccer.Toolbar.Title</item>
     </style>
 
-    <style name="Bobsoccer.TabLayout" parent="Widget.Design.TabLayout">
+    <style name="Bobsoccer.Toolbar.Title" parent="@style/TextAppearance.AppCompat.Title">
+        <item name="android:textColor">@color/theme_toolbar_text_color</item>
+    </style>
+
+    <style name="Bobsoccer.TabLayout" parent="@style/Widget.Design.TabLayout">
         <item name="tabGravity">fill</item>
         <item name="tabMode">fixed</item>
         <item name="tabBackground">?attr/selectableItemBackground</item>
@@ -29,10 +34,23 @@
         <item name="tabSelectedTextColor">@color/theme_tab_text_color</item>
     </style>
 
-    <style name="Bobsoccer.TabLayout.TextAppearance" parent="TextAppearance.Design.Tab">
+    <style name="Bobsoccer.TabLayout.TextAppearance" parent="@style/TextAppearance.Design.Tab">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/theme_tab_text_color</item>
         <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="Bobsoccer.CardView" parent="@style/CardView">
+        <item name="android:layout_marginLeft">@dimen/cardview_margin_horizontal</item>
+        <item name="android:layout_marginRight">@dimen/cardview_margin_horizontal</item>
+        <item name="android:layout_marginTop">@dimen/cardview_margin_vertical</item>
+        <item name="android:layout_marginBottom">@dimen/cardview_margin_vertical</item>
+    </style>
+
+    <style name="Bobsoccer.CardView.Header" parent="@style/TextAppearance.AppCompat.Title"></style>
+
+    <style name="Bobsoccer.CardView.Forward" parent="@style/Base.Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textColor">@color/app_primary_accent</item>
     </style>
 
 </resources>

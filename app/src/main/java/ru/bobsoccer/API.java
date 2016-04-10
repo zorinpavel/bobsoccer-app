@@ -28,7 +28,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
+class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
 
     private static final String TAG = "API";
     private static final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpeg");
@@ -148,7 +148,7 @@ public class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
                     builder.setTitle("Timeout error")
-                            .setMessage("Sorry server doesn't response!\nCheck your internet connection or try again.")
+                            .setMessage("Sorry server doesn't response!\nCheck your internet connection and try again.")
                             .setCancelable(true)
                             .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
                                 @Override

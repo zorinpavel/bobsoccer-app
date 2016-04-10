@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    style="@style/Bobsoccer.CardView">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="@dimen/cardview_padding_horizontal">
+
+            <ImageView
+                android:layout_width="@android:dimen/app_icon_size"
+                android:layout_height="@android:dimen/app_icon_size"
+                android:id="@+id/Blo_Avatar"
+                android:src="@drawable/ic_account_circle_dark_48dp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/Blo_Login"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Виллаш-Боаш"
+                    style="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />
+
+                <TextView
+                    android:id="@+id/Blo_Date"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Сегодня 17:22"
+                    style="@style/TextAppearance.AppCompat.Caption" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/Blo_Header"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            style="@style/Bobsoccer.CardView.Header"
+            android:text="Андре Виллаш-Боаш: Взяли очки там, где их потеряли наши соперники"
+            android:layout_marginLeft="@dimen/cardview_padding_horizontal"
+            android:layout_marginRight="@dimen/cardview_padding_horizontal"
+            android:layout_marginBottom="@dimen/cardview_padding_vertical" />
+
+        <TextView
+            android:id="@+id/Blo_Anounce"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Это был очень непростой матч. Думаю, мы забили второй гол в очень нужный момент, когда оказались под давлением соперника, и в итоге одержали победу на очень непростом поле - там, где наши непосредственные соперники, Ростов и ЦСКА, потеряли очки. Это важнейшая победа и с точки зрения борьбы в турнире."
+            android:paddingLeft="@dimen/cardview_padding_horizontal"
+            android:paddingRight="@dimen/cardview_padding_horizontal"
+            android:paddingBottom="@dimen/cardview_padding_vertical" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/cardview_action_margin"
+            android:layout_marginRight="@dimen/cardview_action_margin"
+            android:layout_marginBottom="@dimen/cardview_action_margin">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Читать"
+                android:id="@+id/button_forward"
+                android:layout_gravity="right"
+                style="@style/Bobsoccer.CardView.Forward"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

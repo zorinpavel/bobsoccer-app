@@ -1,20 +1,12 @@
 package ru.bobsoccer;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -22,17 +14,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -41,14 +30,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings("unchecked")
 public abstract class BaseActivity extends AppCompatActivity implements
-        SharedPreferences.OnSharedPreferenceChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
 
-    private final String TAG = "bobsoccer.BaseActivity";
+    private final String TAG = "BaseActivity";
 
     // titles for navdrawer items (indices must correspond to the above)
     private static final int[] NAVDRAWER_TITLE_RES_ID = new int[]{
@@ -63,33 +50,33 @@ public abstract class BaseActivity extends AppCompatActivity implements
             R.drawable.ic_navview_settings, // Settings.
             R.drawable.ic_navview_off, // Settings.
     };
-
-    private Toolbar mToolbar;
-    private ViewPager mViewPager;
-    private NavigationView mNavigationView;
-    private DrawerLayout mDrawerLayout;
-    private Context mContext;
-
-    public Session activitySession;
-
     // list of navdrawer items that were actually added to the navdrawer, in order
     private ArrayList<Integer> mNavDrawerItems = new ArrayList<>();
+
+
+    private Toolbar mToolbar;
+    private NavigationView mNavigationView;
+    private DrawerLayout mDrawerLayout;
+
+    public Session activitySession;
 
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
     protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
     protected static final int NAVDRAWER_ITEM_SEPARATOR_SPECIAL = -3;
+    protected static final String TAB_POSITION = "TAB_POSITION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activitySession = new Session(this);
-        mContext = getApplicationContext();
+        Log.d(TAG, "onCreate");
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        setupNavDrawer();
+        setupActionBar();
+        setupDrawerLayout();
     }
 
     @Override
@@ -103,16 +90,17 @@ public abstract class BaseActivity extends AppCompatActivity implements
                     User rUser = new User(resultObj.getJSONObject("User"));
                     activitySession.SetObject("currentUser", rUser);
 
-                    setupNavDrawer();
                     setupAccauntBox();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-        }, "GET", "Users", "GetUser")
+        }, "GET", "Users", "GetCurrentUser")
                 .setHiddenDialog()
                 .execute();
+
+        Log.d(TAG, "onResume");
     }
 
     @Override
@@ -130,6 +118,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
         return super.onCreateOptionsMenu(menu);
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -140,48 +129,30 @@ public abstract class BaseActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    private void setupNavDrawer() {
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        item.setChecked(true);
+        mDrawerLayout.closeDrawers();
+        return true;
+    }
+
+
+    protected int getSelfNavDrawerItem() {
+        return NAVDRAWER_ITEM_INVALID;
+    }
+
+
+    private void setupActionBar() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setTitle(null);
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
+    }
 
-        mViewPager = (ViewPager) findViewById(R.id.tabs_viewpager);
-        setupViewPager(mViewPager);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
-
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                mViewPager.setCurrentItem(tab.getPosition());
-                switch (tab.getPosition()) {
-                    case 0:
-                        Toast.makeText(mContext, "ONE", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 1:
-                        Toast.makeText(mContext, "TWO", Toast.LENGTH_SHORT).show();
-                        break;
-                    case 2:
-                        Toast.makeText(mContext, "THREE", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-
+    private void setupDrawerLayout() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
             return;
@@ -200,7 +171,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
             }
         };
         if (this.mToolbar != null) {
-            this.mToolbar.setNavigationIcon(R.drawable.ic_toolbar_account_circle);
+            this.mToolbar.setNavigationIcon(R.drawable.ic_account_circle_light_36dp);
             this.mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -214,62 +185,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
         createNavDrawerItems();
     }
-
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPagerAdapter.addFrag(new DummyFragment(getResources().getColor(R.color.accent_material_light)), "Новости");
-        viewPagerAdapter.addFrag(new DummyFragment(getResources().getColor(R.color.theme_green_dark)), "Экспертное мнение");
-        viewPagerAdapter.addFrag(new DummyFragment(getResources().getColor(R.color.cardview_dark_background)), "Трибуна");
-        viewPager.setAdapter(viewPagerAdapter);
-    }
-
-    static class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFrag(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
-    }
-
-    @SuppressLint("ValidFragment")
-    public class DummyFragment extends Fragment {
-        int color;
-
-        public DummyFragment() {
-        }
-
-        public DummyFragment(int color) {
-            this.color = color;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_base, container, false);
-            return view;
-        }
-    }
-
 
     private void createNavDrawerItems() {
         mNavDrawerItems.clear();
@@ -311,23 +226,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
         }
     }
 
-    protected int getSelfNavDrawerItem() {
-        return NAVDRAWER_ITEM_INVALID;
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.d(TAG, key);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        item.setChecked(true);
-        mDrawerLayout.closeDrawers();
-        return true;
-    }
-
     private void setupAccauntBox() {
         User currentUser = activitySession.GetObject("currentUser", User.class);
 
@@ -350,8 +248,8 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
             Picasso.with(mToolbar.getContext())
                     .load(API.DomainUrl + String.valueOf(currentUser.userpic))
-                    .placeholder(R.drawable.ic_toolbar_account_circle)
-                    .resize(80, 80)
+                    .placeholder(R.drawable.ic_account_circle_light_36dp)
+                    .resize(Utils.dpToPx(this, 36), Utils.dpToPx(this, 36))
                     .transform(new CircleTransform())
                     .into(target);
 
@@ -373,15 +271,15 @@ public abstract class BaseActivity extends AppCompatActivity implements
             ImageView Level = (ImageView) findViewById(R.id.Level);
             Picasso.with(getApplicationContext())
                     .load(API.DomainUrl + "/img/fishka/big/level_" + String.valueOf(currentUser.Level) + ".png")
-                    .resize(30, 30)
+                    .resize(Utils.dpToPx(this, 12), Utils.dpToPx(this, 12))
                     .into(Level);
         }
 
         ImageView avatar = (ImageView) findViewById(R.id.avatar);
         Picasso.with(getApplicationContext())
                 .load(API.DomainUrl + String.valueOf(currentUser.avatar))
-                .placeholder(R.drawable.ic_toolbar_account_circle)
-                .resize(120, 120)
+                .placeholder(R.drawable.ic_account_circle_dark_48dp)
+                .resize(Utils.dpToPx(this, 48), Utils.dpToPx(this, 48))
                 .transform(new CircleTransform())
                 .into(avatar);
 
