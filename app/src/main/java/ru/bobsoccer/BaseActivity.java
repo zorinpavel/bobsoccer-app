@@ -99,8 +99,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
         switch (item.getItemId()) {
             case android.R.id.home:
-                this.onBackPressed();
-//                NavUtils.navigateUpFromSameTask(this);
                 return true;
             case R.id.action_settings:
                 return true;
