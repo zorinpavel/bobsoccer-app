@@ -1,10 +1,12 @@
 package ru.bobsoccer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,13 +31,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.blog_item, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.blog_list_item, viewGroup, false);
         ViewHolder viewHolder = new ViewHolder(v);
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(final ViewHolder viewHolder, final int position) {
 
         blogItem = getItem(position);
 
@@ -51,6 +53,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
         viewHolder.Blo_LoginView.setText(blogItem.Blo_Login);
         viewHolder.Blo_DateView.setText(blogItem.Blo_Date);
+
+        viewHolder.buttonForwardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Blog clickItem = getItem(position);
+                Intent intent = new Intent(mContext, ItemActivity.class);
+                intent.putExtra("Blo_Code", clickItem.Blo_Code);
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     public Blog getItem(int position) {
@@ -66,6 +78,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         listItems.add(Item);
     }
 
+    public void clearItemsList() {
+        listItems.clear();
+    }
+
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -74,6 +90,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         public ImageView Blo_AvatarView;
         public TextView Blo_LoginView;
         public TextView Blo_DateView;
+        public Button buttonForwardView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -83,6 +100,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             Blo_AvatarView = (ImageView)itemView.findViewById(R.id.Blo_Avatar);
             Blo_LoginView = (TextView)itemView.findViewById(R.id.Blo_Login);
             Blo_DateView = (TextView)itemView.findViewById(R.id.Blo_Date);
+            buttonForwardView = (Button)itemView.findViewById(R.id.button_forward);
 
         }
     }

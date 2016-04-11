@@ -5,10 +5,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -17,10 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.BaseAdapter;
-import android.widget.HeaderViewListAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -29,34 +24,16 @@ import com.squareup.picasso.Target;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 @SuppressWarnings("unchecked")
 public abstract class BaseActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener {
 
     private final String TAG = "BaseActivity";
 
-    // titles for navdrawer items (indices must correspond to the above)
-    private static final int[] NAVDRAWER_TITLE_RES_ID = new int[]{
-            R.string.navdrawer_item_sign_in,
-            R.string.navdrawer_item_settings,
-            R.string.navdrawer_item_log_out,
-    };
-
-    // icons for navdrawer items (indices must correspond to above array)
-    private static final int[] NAVDRAWER_ICON_RES_ID = new int[]{
-            R.drawable.ic_navview_off, // Sign in
-            R.drawable.ic_navview_settings, // Settings.
-            R.drawable.ic_navview_off, // Settings.
-    };
-    // list of navdrawer items that were actually added to the navdrawer, in order
-    private ArrayList<Integer> mNavDrawerItems = new ArrayList<>();
-
-
-    private Toolbar mToolbar;
-    private NavigationView mNavigationView;
-    private DrawerLayout mDrawerLayout;
+    public Toolbar mToolbar;
+    public NavigationView mNavigationView;
+    public DrawerLayout mDrawerLayout;
+    public ActionBarDrawerToggle mDrawerToggle;
 
     public Session activitySession;
 
@@ -69,7 +46,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activitySession = new Session(this);
-        Log.d(TAG, "onCreate");
     }
 
     @Override
@@ -99,8 +75,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
         }, "GET", "Users", "GetCurrentUser")
                 .setHiddenDialog()
                 .execute();
-
-        Log.d(TAG, "onResume");
     }
 
     @Override
@@ -110,7 +84,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        getMenuInflater().inflate(R.menu.toolbar, menu);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
@@ -121,11 +95,16 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        Log.d(TAG, "onOptionsItemSelected:" + item.getItemId() + " = " + R.id.home + " (" + android.R.id.home + ")");
 
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.onBackPressed();
+//                NavUtils.navigateUpFromSameTask(this);
+                return true;
+            case R.id.action_settings:
+                return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -143,42 +122,36 @@ public abstract class BaseActivity extends AppCompatActivity implements
     }
 
 
-    private void setupActionBar() {
+    public void setupActionBar() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setTitle(null);
         setSupportActionBar(mToolbar);
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null)
-            actionBar.setDisplayHomeAsUpEnabled(true);
+
+        mToolbar.setTitle(null);
+        mToolbar.setNavigationIcon(R.drawable.ic_account_circle_light_36dp);
+
+//        ActionBar actionBar = getSupportActionBar();
+//        if(actionBar != null) {
+//            actionBar.setDisplayHomeAsUpEnabled(false);
+//            actionBar.setHomeButtonEnabled(false);
+//        }
+
     }
 
-    private void setupDrawerLayout() {
+    public void setupDrawerLayout() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
             return;
         }
-        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, BaseActivity.this.mToolbar, R.string.open_drawer, R.string.close_drawer) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, BaseActivity.this.mToolbar, R.string.open_drawer, R.string.close_drawer) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                // code here will execute once the drawer is opened
             }
-
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                // Code here will execute once drawer is closed
             }
         };
-        if (this.mToolbar != null) {
-            this.mToolbar.setNavigationIcon(R.drawable.ic_account_circle_light_36dp);
-            this.mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mDrawerLayout.openDrawer(GravityCompat.START);
-                }
-            });
-        }
 
         mNavigationView = (NavigationView) findViewById(R.id.user_navigation_view);
         mNavigationView.setNavigationItemSelectedListener(this);
@@ -186,47 +159,18 @@ public abstract class BaseActivity extends AppCompatActivity implements
         createNavDrawerItems();
     }
 
-    private void createNavDrawerItems() {
-        mNavDrawerItems.clear();
-        final Menu navigationMenu = mNavigationView.getMenu();
-        navigationMenu.clear();
-
-//        navigationMenu.setGroupVisible(R.id.group_1, true)
-
-//        navigationMenu.inflateMenu(R.menu.second_menu);
+    public void createNavDrawerItems() {
+        Menu navigationMenu = mNavigationView.getMenu();
 
         User currentUser = activitySession.GetObject("currentUser", User.class);
-        mNavDrawerItems.add(0);
-
-        if (currentUser != null && currentUser.us_id > 0)
-            mNavDrawerItems.add(1);
-        mNavDrawerItems.add(2);
-
-        for (int itemId : mNavDrawerItems) {
-            navigationMenu.add(NAVDRAWER_TITLE_RES_ID[itemId]);
-
-//            MenuItem menuItem = navigationMenu.getItem(itemId);
-//            menuItem.setIcon(NAVDRAWER_ICON_RES_ID[itemId]);
-//            menuItem.setChecked(getSelfNavDrawerItem() == itemId);
-        }
-
-//        for (int itemId : mNavDrawerItems) {
-//            navigationMenu.findItem(itemId).setIcon(NAVDRAWER_ICON_RES_ID[itemId]);
-//            navigationMenu.findItem(itemId).setChecked(getSelfNavDrawerItem() == itemId);
-//        }
-
-        for (int i = 0, count = mNavigationView.getChildCount(); i < count; i++) {
-            final View child = mNavigationView.getChildAt(i);
-            if (child != null && child instanceof ListView) {
-                final ListView menuView = (ListView) child;
-                final HeaderViewListAdapter adapter = (HeaderViewListAdapter) menuView.getAdapter();
-                final BaseAdapter wrapped = (BaseAdapter) adapter.getWrappedAdapter();
-                wrapped.notifyDataSetChanged();
-            }
+        if (currentUser != null && currentUser.us_id > 0) {
+            navigationMenu.setGroupVisible(R.id.group_sign_in, true);
+        } else {
+            navigationMenu.setGroupVisible(R.id.group_sign_out, true);
         }
     }
 
-    private void setupAccauntBox() {
+    public void setupAccauntBox() {
         User currentUser = activitySession.GetObject("currentUser", User.class);
 
         if (currentUser != null && currentUser.us_id > 0) {

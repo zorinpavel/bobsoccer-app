@@ -155,7 +155,7 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                                 public void onClick(DialogInterface dialog, int id) {
                                     Log.d(TAG, "load again");
                                 }
-                            }).setIcon(android.R.drawable.ic_dialog_alert);
+                            }).setIcon(R.drawable.ic_dialog_alert_dark);
                     AlertDialog alert = builder.create();
                     alert.show();
                 }
@@ -248,7 +248,7 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                         if(!mActivity.getLocalClassName().equals("MainActivity"))
                             mActivity.finish();
                     }
-                }).setIcon(android.R.drawable.ic_dialog_alert);
+                }).setIcon(R.drawable.ic_dialog_alert_dark);
         AlertDialog alert = builder.create();
         alert.show();
     }
@@ -262,7 +262,7 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                     public void onClick(DialogInterface dialog, int id) {
                         // do nothing
                     }
-                }).setIcon(android.R.drawable.ic_dialog_info);
+                }).setIcon(R.drawable.ic_dialog_info_dark);
         AlertDialog alert = builder.create();
         alert.show();
     }

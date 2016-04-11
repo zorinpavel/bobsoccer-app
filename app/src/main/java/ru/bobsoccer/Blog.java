@@ -9,10 +9,11 @@ class Blog {
 
     Integer Blo_Code;
     String  Blo_Header;
-    String  Blo_Anounce;
-    String  Blo_Avatar;
     String  Blo_Login;
+    String  Blo_Avatar;
     String  Blo_Date;
+    String  Blo_Anounce;
+    String  Blo_Text;
 
     Blog(JSONObject Blog) {
         try {
@@ -23,6 +24,7 @@ class Blog {
             Blo_Avatar  = Blog.getString("avatar");
             Blo_Login   = Blog.getString("login");
             Blo_Date    = Blog.getString("Blo_DateToday");
+            Blo_Text    = String.valueOf(Html.fromHtml(Blog.getString("Blo_Text")));
 
         } catch (JSONException e) {
             e.printStackTrace();

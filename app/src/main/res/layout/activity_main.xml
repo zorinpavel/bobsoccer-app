@@ -48,6 +48,11 @@
         android:layout_width="wrap_content"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/user_navigation_header" />
+        app:headerLayout="@layout/user_navigation_header"
+        app:menu="@menu/user_navigation"
+        app:itemTextColor="@color/navigation_item_color_state"
+        app:itemBackground="@android:color/transparent"
+        app:itemIconTint="@color/navigation_item_color_state"
+        style="@style/Bobsoccer.NavigationView"/>
 
 </android.support.v4.widget.DrawerLayout>

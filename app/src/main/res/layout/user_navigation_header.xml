@@ -36,7 +36,7 @@
                     android:text="Login"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/theme_login_red" />
+                    android:textColor="@color/navigation_login" />
 
                 <ImageView
                     android:layout_width="24sp"

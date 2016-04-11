@@ -89,6 +89,7 @@ public class TabFragment extends Fragment {
             public void onTaskCompleted(JSONObject resultObj) {
                 JSONArray resultItems;
                 try {
+                    recyclerAdapter.clearItemsList();
                     resultItems = resultObj.getJSONArray("Items");
                     for (int i = 0; i < resultItems.length(); i++) {
                         recyclerAdapter.addItemsToList(new Blog(resultItems.getJSONObject(i)));
