@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_marginRight="@dimen/activity_horizontal_margin"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="@dimen/cardview_padding_vertical">
+
+        <ImageView
+            android:layout_width="@android:dimen/app_icon_size"
+            android:layout_height="@android:dimen/app_icon_size"
+            android:id="@+id/Blo_Avatar"
+            android:src="@drawable/ic_account_circle_dark_48dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/Blo_Login"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Виллаш-Боаш"
+                style="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />
+
+            <TextView
+                android:id="@+id/Blo_Date"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Сегодня 17:22"
+                style="@style/TextAppearance.AppCompat.Caption" />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/Blo_Header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        style="@style/Bobsoccer.BlogView.Header"
+        android:text="Андре Виллаш-Боаш: Взяли очки там, где их потеряли наши соперники"
+        android:layout_marginBottom="@dimen/cardview_padding_vertical" />
+
+    <TextView
+        android:id="@+id/Blo_Anounce"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/default_message_short"
+        android:layout_marginBottom="@dimen/cardview_padding_vertical"
+        style="@style/Bobsoccer.BlogView.Anounce" />
+
+    <TextView
+        android:id="@+id/Blo_Text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/default_message" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    </LinearLayout>
+
+</LinearLayout>

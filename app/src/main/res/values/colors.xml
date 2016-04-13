@@ -21,4 +21,11 @@
 
     <color name="theme_cardview_background">#FFFFFF</color>
 
+    <color name="black_transparent_190">#be000000</color>
+    <color name="gray_transparent_200">#c8757575</color>
+    <color name="gray_transparent_150">#96757575</color>
+    <color name="gray_transparent_100">#64757575</color>
+
+    <color name="black_overlay">#66000000</color>
+
 </resources>

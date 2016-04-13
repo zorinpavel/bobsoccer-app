@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Bobsoccer" parent="Theme.AppCompat.Light.NoActionBar" >
+    <style name="Bobsoccer" parent="Base.Bobsoccer" />
+
+    <style name="Base.Bobsoccer" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/app_primary</item>
         <item name="colorPrimaryDark">@color/app_primary_dark</item>
         <item name="colorAccent">@color/app_primary_accent</item>
 
-        <item name="windowActionBar">false</item>
-        <item name="windowActionBarOverlay">true</item>
         <item name="windowNoTitle">true</item>
+
         <item name="android:windowBackground">@color/app_window_background_light</item>
     </style>
 
-    <style name="Bobsoccer.NavigationView" parent="@style/Widget.Design.NavigationView">
-    </style>
+    <style name="Bobsoccer.NavigationView" parent="Widget.Design.NavigationView" />
 
-    <style name="Bobsoccer.Toolbar" parent="Widget.AppCompat.Light.ActionBar.Solid">
+    <style name="Bobsoccer.Toolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:background">@color/theme_toolbar_background</item>
         <item name="backgroundStacked">@color/theme_toolbar_background</item>
         <item name="backgroundSplit">@color/theme_toolbar_background</item>
         <item name="titleTextStyle">@style/Bobsoccer.Toolbar.Title</item>
     </style>
 
+    <style name="Bobsoccer.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
     <style name="Bobsoccer.Toolbar.Title" parent="TextAppearance.AppCompat.Title">
         <item name="android:textColor">@color/theme_toolbar_text_color</item>
+    </style>
+
+    <style name="Bobsoccer.Toolbar.Title.Expanded" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">20sp</item>
     </style>
 
     <style name="Bobsoccer.TabLayout" parent="Widget.Design.TabLayout">
@@ -50,11 +56,35 @@
         <item name="android:layout_marginBottom">@dimen/cardview_margin_vertical</item>
     </style>
 
-    <style name="Bobsoccer.CardView.Header" parent="TextAppearance.AppCompat.Title">
-    </style>
+    <style name="Bobsoccer.CardView.Header" parent="TextAppearance.AppCompat.Title" />
 
     <style name="Bobsoccer.CardView.Forward" parent="Base.Widget.AppCompat.Button.Borderless.Colored">
         <item name="android:textColor">?attr/colorAccent</item>
+    </style>
+
+
+    <style name="Bobsoccer.BlogView" />
+
+    <style name="Bobsoccer.BlogView.Header" parent="Bobsoccer.CardView.Header" />
+
+    <style name="Bobsoccer.BlogView.Anounce">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!--<style name="FullscreenTheme" parent="Bobsoccer">-->
+        <!--<item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>-->
+        <!--<item name="android:windowActionBarOverlay">true</item>-->
+        <!--<item name="android:windowBackground">@null</item>-->
+        <!--<item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>-->
+        <!--<item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>-->
+    <!--</style>-->
+
+    <!--<style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">-->
+        <!--<item name="android:background">@color/black_overlay</item>-->
+    <!--</style>-->
+
+    <style name="Bobsoccer.Login" parent="Bobsoccer">
+        <item name="android:windowBackground">@color/app_window_background_light</item>
     </style>
 
 </resources>

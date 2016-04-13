@@ -31,4 +31,11 @@
     <string name="action_search">Поиск</string>
     <string name="action_settings">Настройки</string>
 
+    <string name="login_enter">Войти</string>
+    <string name="login_dont_have_account">Нет аккаунта? Зарегистрироваться</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Пароль</string>
+    <string name="enter_valid_email">Не верный email адрес</string>
+    <string name="enter_valid_password">Пароль слишком короткий</string>
+
 </resources>

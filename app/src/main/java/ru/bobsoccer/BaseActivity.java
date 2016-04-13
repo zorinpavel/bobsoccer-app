@@ -1,5 +1,6 @@
 package ru.bobsoccer;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -11,13 +12,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -30,12 +31,15 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
     private final String TAG = "BaseActivity";
 
+    private static final int REQUEST_SIGNIN = 1;
+
     public Toolbar mToolbar;
     public NavigationView mNavigationView;
     public DrawerLayout mDrawerLayout;
     public ActionBarDrawerToggle mDrawerToggle;
 
     public Session activitySession;
+    public User currentUser;
 
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
     protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
@@ -66,20 +70,17 @@ public abstract class BaseActivity extends AppCompatActivity implements
                     User rUser = new User(resultObj.getJSONObject("User"));
                     activitySession.SetObject("currentUser", rUser);
 
-                    setupAccauntBox();
+                    setupAccaunt();
+                    setupDrawerLayout();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }, "GET", "Users", "GetCurrentUser")
-                .setHiddenDialog()
+                .setLoadingDialogDisabled()
+                .setErrorDialogDisabled()
                 .execute();
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -95,8 +96,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG, "onOptionsItemSelected:" + item.getItemId() + " = " + R.id.home + " (" + android.R.id.home + ")");
-
         switch (item.getItemId()) {
             case android.R.id.home:
                 return true;
@@ -111,9 +110,29 @@ public abstract class BaseActivity extends AppCompatActivity implements
     public boolean onNavigationItemSelected(MenuItem item) {
         item.setChecked(true);
         mDrawerLayout.closeDrawers();
+        switch (item.getItemId()) {
+            case R.id.navigation_signin:
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivityForResult(intent, REQUEST_SIGNIN);
+                break;
+        }
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case REQUEST_SIGNIN:
+                if(resultCode == CommonStatusCodes.SUCCESS) {
+                    setupAccaunt();
+                    createNavDrawerItems();
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
+        }
+    }
 
     protected int getSelfNavDrawerItem() {
         return NAVDRAWER_ITEM_INVALID;
@@ -125,7 +144,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
         setSupportActionBar(mToolbar);
 
         mToolbar.setTitle(null);
-        mToolbar.setNavigationIcon(R.drawable.ic_account_circle_light_36dp);
 
 //        ActionBar actionBar = getSupportActionBar();
 //        if(actionBar != null) {
@@ -136,6 +154,8 @@ public abstract class BaseActivity extends AppCompatActivity implements
     }
 
     public void setupDrawerLayout() {
+        mToolbar.setNavigationIcon(R.drawable.ic_account_circle_light_36dp);
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout == null) {
             return;
@@ -160,18 +180,17 @@ public abstract class BaseActivity extends AppCompatActivity implements
     public void createNavDrawerItems() {
         Menu navigationMenu = mNavigationView.getMenu();
 
-        User currentUser = activitySession.GetObject("currentUser", User.class);
         if (currentUser != null && currentUser.us_id > 0) {
-            navigationMenu.setGroupVisible(R.id.group_sign_in, true);
+            navigationMenu.setGroupVisible(R.id.group_signin, true);
         } else {
-            navigationMenu.setGroupVisible(R.id.group_sign_out, true);
+            navigationMenu.setGroupVisible(R.id.group_signout, true);
         }
     }
 
-    public void setupAccauntBox() {
-        User currentUser = activitySession.GetObject("currentUser", User.class);
+    public void setupAccaunt() {
+        currentUser = activitySession.GetObject("currentUser", User.class);
 
-        if (currentUser != null && currentUser.us_id > 0) {
+        if(currentUser != null && currentUser.us_id > 0) {
             Target target = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -195,36 +214,37 @@ public abstract class BaseActivity extends AppCompatActivity implements
                     .transform(new CircleTransform())
                     .into(target);
 
-        TextView login = (TextView) findViewById(R.id.login);
-        login.setText(currentUser.login);
-        login.setTextColor(getResources().getColor(R.color.theme_red_dark));
-//
-        TextView mail = (TextView) findViewById(R.id.mail);
-        mail.setText(currentUser.mail);
+            if(mDrawerLayout != null) {
+                TextView login = (TextView) findViewById(R.id.login);
+                login.setText(currentUser.login);
+                login.setTextColor(getResources().getColor(R.color.theme_red_dark));
+                //
+                TextView mail = (TextView) findViewById(R.id.mail);
+                mail.setText(currentUser.mail);
 
-        TextView Lev_Points = (TextView) findViewById(R.id.Lev_Points);
-        Lev_Points.setText(String.valueOf(currentUser.Lev_Points));
+                TextView Lev_Points = (TextView) findViewById(R.id.Lev_Points);
+                Lev_Points.setText(String.valueOf(currentUser.Lev_Points));
 
-        TextView Prev_Points = (TextView) findViewById(R.id.Prev_Points);
-        Prev_Points.setText((currentUser.Dif_Points >= 0 ? "+" : "-") + String.valueOf(currentUser.Dif_Points));
-        Prev_Points.setTextColor(getResources().getColor(currentUser.Color_Points));
+                TextView Prev_Points = (TextView) findViewById(R.id.Prev_Points);
+                Prev_Points.setText((currentUser.Dif_Points >= 0 ? "+" : "-") + String.valueOf(currentUser.Dif_Points));
+                Prev_Points.setTextColor(getResources().getColor(currentUser.Color_Points));
 
-        if(currentUser.Level > 0) {
-            ImageView Level = (ImageView) findViewById(R.id.Level);
-            Picasso.with(getApplicationContext())
-                    .load(API.DomainUrl + "/img/fishka/big/level_" + String.valueOf(currentUser.Level) + ".png")
-                    .resize(Utils.dpToPx(this, 12), Utils.dpToPx(this, 12))
-                    .into(Level);
-        }
+                if (currentUser.Level > 0) {
+                    ImageView Level = (ImageView) findViewById(R.id.Level);
+                    Picasso.with(getApplicationContext())
+                            .load(API.DomainUrl + "/img/fishka/big/level_" + String.valueOf(currentUser.Level) + ".png")
+                            .resize(Utils.dpToPx(this, 12), Utils.dpToPx(this, 12))
+                            .into(Level);
+                }
 
-        ImageView avatar = (ImageView) findViewById(R.id.avatar);
-        Picasso.with(getApplicationContext())
-                .load(API.DomainUrl + String.valueOf(currentUser.avatar))
-                .placeholder(R.drawable.ic_account_circle_dark_48dp)
-                .resize(Utils.dpToPx(this, 48), Utils.dpToPx(this, 48))
-                .transform(new CircleTransform())
-                .into(avatar);
-
+                ImageView avatar = (ImageView) findViewById(R.id.avatar);
+                Picasso.with(getApplicationContext())
+                        .load(API.DomainUrl + String.valueOf(currentUser.avatar))
+                        .placeholder(R.drawable.ic_account_circle_dark_48dp)
+                        .resize(Utils.dpToPx(this, 48), Utils.dpToPx(this, 48))
+                        .transform(new CircleTransform())
+                        .into(avatar);
+            }
         }
     }
 

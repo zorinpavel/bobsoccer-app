@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:id="@+id/group_sign_out"
+    <group android:id="@+id/group_signout"
         android:visible="false"
         android:checkableBehavior="single">
 
-        <item android:id="@+id/item_sign_in"
+        <item android:id="@+id/navigation_signin"
             android:title="@string/navigation_item_sign_in"
-            android:icon="@drawable/navigation_item_sign_in"/>
+            android:icon="@drawable/navigation_item_signin"/>
 
     </group>
 
-    <group android:id="@+id/group_sign_in"
+    <group android:id="@+id/group_signin"
         android:visible="false"
         android:checkableBehavior="single">
 
-        <item android:id="@+id/item_sign_out"
+        <item android:id="@+id/item_signout"
             android:title="@string/navigation_item_sign_out"
-            android:icon="@drawable/navigation_item_sign_out"/>
+            android:icon="@drawable/navigation_item_signout"/>
 
     </group>
 

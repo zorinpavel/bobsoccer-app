@@ -3,7 +3,6 @@
     package="ru.bobsoccer">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -14,16 +13,23 @@
         android:supportsRtl="true"
         android:theme="@style/Bobsoccer">
 
-        <activity android:name="ru.bobsoccer.MainActivity">
+        <activity
+            android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name="ru.bobsoccer.ItemActivity"
-            android:parentActivityName="ru.bobsoccer.MainActivity" >
-        </activity>
+        <activity
+            android:name=".ItemActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Bobsoccer.BlogView"/>
+
+        <activity
+            android:name=".LoginActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Bobsoccer.Login"/>
 
     </application>
 

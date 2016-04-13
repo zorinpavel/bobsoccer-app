@@ -41,7 +41,8 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     public static final String ApiUrlBase = "http://" + ApiHostName;
     private String ApiUrlRequest = null;
 
-    private Boolean hiddenDialog = false;
+    private Boolean LOADING_DIALOG_ENABLED = true;
+    private Boolean ERROR_DIALOG_ENABLED = true;
     private Map<String, String> requestParams = new HashMap<>();
 
     public interface ApiResponse {
@@ -70,7 +71,7 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (!hiddenDialog) {
+        if (LOADING_DIALOG_ENABLED) {
             pDialog = new ProgressDialog(mActivity);
             pDialog.setMessage("Загрузка ...");
             pDialog.setCancelable(false);
@@ -91,23 +92,22 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
     protected void onPostExecute(JSONObject resultObj) {
         super.onPostExecute(resultObj);
 
-        if (!hiddenDialog) {
+        if (LOADING_DIALOG_ENABLED) {
             if (pDialog.isShowing())
                 pDialog.dismiss();
         }
 
         try {
             String isError = resultObj.getString("Error");
-            if (isError.equals("1")) {
+            if(isError.equals("1") && ERROR_DIALOG_ENABLED) {
                 String ErrorValue = "";
                 JSONArray Errors = resultObj.getJSONArray("Errors");
                 for (int i = 0; i < Errors.length(); i++) {
                     ErrorValue = ErrorValue + Errors.getJSONObject(i).getString("Error") + "\n";
                 }
                 showNotice(ErrorValue);
-            } else {
+            } else
                 apiResponse.onTaskCompleted(resultObj);
-            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -140,7 +140,7 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                 public void run() {
                     if (getStatus() == Status.RUNNING) {
                         cancel(true);
-                        if(!hiddenDialog) {
+                        if(LOADING_DIALOG_ENABLED) {
                             if (pDialog.isShowing())
                                 pDialog.dismiss();
                         }
@@ -166,7 +166,7 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                 public void run() {
                     if (getStatus() == Status.RUNNING) {
                         cancel(true);
-                        if (!hiddenDialog) {
+                        if (LOADING_DIALOG_ENABLED) {
                             if (pDialog.isShowing())
                                 pDialog.dismiss();
                         }
@@ -267,8 +267,13 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
         alert.show();
     }
 
-    public API setHiddenDialog() {
-        hiddenDialog = true;
+    public API setLoadingDialogDisabled() {
+        LOADING_DIALOG_ENABLED = false;
+        return this;
+    }
+
+    public API setErrorDialogDisabled() {
+        ERROR_DIALOG_ENABLED = false;
         return this;
     }
 

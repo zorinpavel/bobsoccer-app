@@ -35,8 +35,7 @@ class User {
 
             }
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (JSONException ignored) {
         }
     }
 
