@@ -166,7 +166,7 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                 public void run() {
                     if (getStatus() == Status.RUNNING) {
                         cancel(true);
-                        if (LOADING_DIALOG_ENABLED) {
+                        if(LOADING_DIALOG_ENABLED) {
                             if (pDialog.isShowing())
                                 pDialog.dismiss();
                         }
@@ -174,6 +174,8 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
                     showError("API.Get server error");
                 }
             });
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
 
         Log.d(TAG, String.valueOf(jsonObj));
