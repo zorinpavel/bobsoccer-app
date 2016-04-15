@@ -133,7 +133,7 @@ class API extends AsyncTask<Map<String, String>, Void, JSONObject> {
         try {
             response = client.newCall(request).execute();
             String responseBody = response.body().string();
-            Log.d(TAG, responseBody);
+//            Log.d(TAG, responseBody);
             jsonObj = new JSONObject(responseBody);
             ApiUrlRequest = null;
         } catch (IOException e) {

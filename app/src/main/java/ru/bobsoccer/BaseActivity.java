@@ -44,7 +44,12 @@ public abstract class BaseActivity extends AppCompatActivity implements
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
     protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
     protected static final int NAVDRAWER_ITEM_SEPARATOR_SPECIAL = -3;
+
     protected static final String TAB_POSITION = "TAB_POSITION";
+    protected static final String LAST_USER_TIME = "LAST_USER_TIME";
+
+    public long currentTimeMillis = System.currentTimeMillis();
+    public long lastUserTimeMillis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,24 +68,30 @@ public abstract class BaseActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
 
-        new API(this, new API.ApiResponse() {
-            @Override
-            public void onTaskCompleted(JSONObject resultObj) {
-                try {
-                    User rUser = new User(resultObj.getJSONObject("User"));
-                    activitySession.SetObject("currentUser", rUser);
+        lastUserTimeMillis = Long.parseLong(activitySession.Get(LAST_USER_TIME), 0);
 
-                    setupAccaunt();
-                    setupDrawerLayout();
+        if(lastUserTimeMillis < currentTimeMillis - 60) {
+            activitySession.Set(LAST_USER_TIME, String.valueOf(currentTimeMillis));
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
+            new API(this, new API.ApiResponse() {
+                @Override
+                public void onTaskCompleted(JSONObject resultObj) {
+                    try {
+                        User rUser = new User(resultObj.getJSONObject("User"));
+                        activitySession.SetObject("currentUser", rUser);
+
+                        setupAccaunt();
+                        setupDrawerLayout();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        }, "GET", "Users", "GetCurrentUser")
-                .setLoadingDialogDisabled()
-                .setErrorDialogDisabled()
-                .execute();
+            }, "GET", "Users", "GetCurrentUser")
+                    .setLoadingDialogDisabled()
+                    .setErrorDialogDisabled()
+                    .execute();
+        }
     }
 
     @Override
@@ -125,7 +136,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
             case REQUEST_SIGNIN:
                 if(resultCode == CommonStatusCodes.SUCCESS) {
                     setupAccaunt();
-                    createNavDrawerItems();
                 }
                 break;
             default:
@@ -174,10 +184,6 @@ public abstract class BaseActivity extends AppCompatActivity implements
         mNavigationView = (NavigationView) findViewById(R.id.user_navigation_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        createNavDrawerItems();
-    }
-
-    public void createNavDrawerItems() {
         Menu navigationMenu = mNavigationView.getMenu();
 
         if (currentUser != null && currentUser.us_id > 0) {

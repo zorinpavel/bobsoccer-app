@@ -69,7 +69,6 @@ public class ItemActivity extends BaseActivity {
 
     @Override
     public void setupDrawerLayout() {
-//        super.setupDrawerLayout();
 
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null) {
